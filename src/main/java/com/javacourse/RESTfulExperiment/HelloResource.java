@@ -1,5 +1,10 @@
 package com.javacourse.RESTfulExperiment;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.inject.Singleton;
 import javax.json.JsonObject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.*;
@@ -12,9 +17,13 @@ import javax.ws.rs.core.Response;
 
 import com.javacourse.RESTfulExperiment.entity.User;
 
+@Singleton
 @Path("/hello")
 public class HelloResource {
 	
+    private final Map<Integer, User> usersStore = new ConcurrentHashMap<>();
+    private final AtomicInteger userId = new AtomicInteger();
+    
 	@Context
 	ServletContext context;
 	
