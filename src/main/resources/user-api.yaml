@@ -1,0 +1,222 @@
+openapi: 3.0.1
+info:
+  title: Swagger admin
+  description: 'This is a sample server admin server.  You can find out more about     Swagger
+    at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For
+    this sample, you can use the api key `special-key` to test the authorization     filters.'
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://admin.swagger.io/v2
+- url: http://admin.swagger.io/v2
+tags:
+- name: user
+  description: Everything about your users
+  externalDocs:
+    description: Find out more
+    url: http://swagger.io
+paths:
+  /user:
+    put:
+      tags:
+      - user
+      summary: Update an existing user
+      operationId: updateuser
+      requestBody:
+        description: user object that needs to be added 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: user not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      security:
+      - admin_auth:
+        - write:users
+        - read:users
+      x-codegen-request-body-name: body
+    post:
+      tags:
+      - user
+      summary: Add a new user 
+      operationId: adduser
+      requestBody:
+        description: user object that needs to be added 
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        405:
+          description: Invalid input
+          content: {}
+      security:
+      - admin_auth:
+        - write:users
+        - read:users
+      x-codegen-request-body-name: body
+  /user/{userId}:
+    get:
+      tags:
+      - user
+      summary: Find user by ID
+      description: Returns a single user
+      operationId: getuserById
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user to return
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/user'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: user not found
+          content: {}
+      security:
+      - api_key: []
+    post:
+      tags:
+      - user
+      summary: Updates a user 
+      operationId: updateuserById
+      parameters:
+      - name: userId
+        in: path
+        description: ID of user that needs to be updated
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                name:
+                  type: string
+                  description: Updated name of the user
+                status:
+                  type: string
+                  description: Updated status of the user
+      responses:
+        405:
+          description: Invalid input
+          content: {}
+      security:
+      - admin_auth:
+        - write:users
+        - read:users
+    delete:
+      tags:
+      - user
+      summary: Deletes a user
+      operationId: deleteuser
+      parameters:
+      - name: api_key
+        in: header
+        schema:
+          type: string
+      - name: userId
+        in: path
+        description: user id to delete
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: user not found
+          content: {}
+      security:
+      - admin_auth:
+        - write:users
+        - read:users
+components:
+  schemas:
+    user:
+      required:
+      - name
+      - photoUrls
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: kevin
+        lastname:
+          type: string
+          example: mitnik
+        age:
+          type: integer
+          format: int32
+        address:
+          type: string
+          description: user address 
+      xml:
+        name: user
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+  securitySchemes:
+    admin_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://admin.swagger.io/oauth/dialog
+          scopes:
+            write:users: modify users in your account
+            read:users: read your users
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
